@@ -11,44 +11,20 @@ export default function () {
   const { photoId } = useParams();
   const navigate = useNavigate();
 
-  const { getAllPhotos, popover, photos } = useContext(photoAppContext);
+  const { getAllPhotos, popover, removePhoto, likePhoto, dislikePhoto, user } =
+    useContext(photoAppContext);
 
   const [photo, setPhoto] = useState({});
 
-  /**
-   * Um unsere React App (View) mit unserem Backend (Controller und "Model") zu verbinden,
-   * machen wir lediglich ein fetch an unseren localhost. Da fetch das Wort "localhost" mag,
-   * benutzen wir die dazugehörige IP Adresse.
-   *
-   * Frontend und Backend befinden sich im selben Hafen (localhost) und haben zwei
-   * Stegnummern (3000 und 4000) über die sie erreichbar sind.
-   *
-   * In einem real world example wäre das optimale Setup, dass sich unser FE und das BE in
-   * zwei Docker Container befinden und über festgelegte Wege miteinander kommunizieren.
-   * Leider sprengt Docker den Rahmen von diese, Kurs. Ich kann euch aber empfehlen, euch das
-   * selbstständig anzuschauen.
-   *
-   * Den fetch machen wir in Abhängigkeit von unserem Parameter, heißt immer wenn sich der
-   * Parameter ändert rufen wir neu die Daten ab
-   */
-
   useEffect(() => {
-    fetch(`/api/photos/${photoId}`)
-      .then((response) => response.json())
-      .then((data) => setPhoto(data));
+    try {
+      fetch(`/api/photos/${photoId}`)
+        .then((response) => response.json())
+        .then((data) => setPhoto(data));
+    } catch (error) {
+      console.error(error);
+    }
   }, [photoId]);
-
-  const removePhoto = () => {
-    fetch(`/api/photos/${photoId}`, {
-      method: "DELETE",
-    }).then((res) => {
-      res.status === 202 ? getAllPhotos() : console.error(res.status);
-
-      navigate("/photos");
-    });
-  };
-
-  const like = photos.find((p) => p.id === +photoId);
 
   return (
     <Container className="d-flex justify-content-center">
@@ -62,16 +38,19 @@ export default function () {
           >
             <Button variant="success">Add to Album</Button>
           </OverlayTrigger>
-          <Button className="mx-5" onClick={removePhoto}>
+          <Button
+            className="mx-5"
+            onClick={() => removePhoto(photoId, getAllPhotos)}
+          >
             Remove
           </Button>
-          {like.isLiked ? (
+          {user.likedPhotos?.includes(photoId) ? (
             <FilledLikeBtn
               className="like-btn"
-              onClick={() => likePhoto(+photoId)}
+              onClick={() => dislikePhoto(photoId)}
             />
           ) : (
-            <LikeBtn onClick={() => likePhoto(+photoId)} />
+            <LikeBtn onClick={() => likePhoto(photoId)} />
           )}
         </div>
       </div>

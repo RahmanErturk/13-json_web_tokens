@@ -8,11 +8,15 @@ export default function () {
   const { allAlbums, getAllAlbums } = useContext(photoAppContext);
 
   const deleteAlbum = (id) => {
-    fetch(`/api/albums/${id}`, {
-      method: "DELETE",
-    }).then((res) =>
-      res.status === 202 ? getAllAlbums() : console.error(res.status)
-    );
+    try {
+      fetch(`/api/albums/${id}`, {
+        method: "DELETE",
+      }).then((res) =>
+        res.status === 204 ? getAllAlbums() : console.error(res.status)
+      );
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   return (
@@ -27,7 +31,7 @@ export default function () {
           <Col key={i}>
             <AlbumIcon album={a} />
             <Button
-              onClick={() => deleteAlbum(a.id)}
+              onClick={() => deleteAlbum(a._id)}
               className="mx-5"
               variant="outline-success"
             >

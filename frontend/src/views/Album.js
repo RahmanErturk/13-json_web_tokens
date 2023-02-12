@@ -11,41 +11,39 @@ import FilledLikeBtn from "@mui/icons-material/Favorite";
 export default function () {
   const { albumId } = useParams();
   const navigate = useNavigate();
-  const { getAlbumPhotos, album, setAlbum, albumPhotos, getAllAlbums } =
-    useContext(photoAppContext);
+  const {
+    getAlbumPhotos,
+    album,
+    setAlbum,
+    albumPhotos,
+    removeFromAlbum,
+    likePhoto,
+    dislikePhoto,
+    user,
+  } = useContext(photoAppContext);
 
   const [nameChange, setNameChange] = useState(false);
   const [input, setInput] = useState("");
 
   useEffect(() => {
-    fetch(`/api/albums/${albumId}`)
-      .then((res) => res.json())
-      .then((data) => setAlbum(data));
+    try {
+      fetch(`/api/albums/${albumId}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setAlbum(data);
+        });
+    } catch (error) {
+      console.error(error);
+    }
   }, [albumId]);
 
-  useEffect(getAlbumPhotos, [album]);
-
-  const removeFromAlbum = (id) => {
-    const index = album.photos.findIndex((a) => a === id);
-
-    const updatedAlbumPhotos = album.photos.splice(index, 1);
-
-    fetch(`/api/albums/${albumId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        photos: [...album.photos],
-      }),
-    }).then((res) =>
-      res.status === 202 ? getAlbumPhotos() : console.error(res.status)
-    );
-  };
+  useEffect(getAlbumPhotos, [album._id]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch(`/api/albums/${album.id}`, {
-      method: "PUT",
+    fetch(`/api/albums/${albumId}`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         name: input,
@@ -60,17 +58,17 @@ export default function () {
 
   const mappedAlbumPhotos = albumPhotos.map((p, i) => (
     <Col key={i} className="mb-5">
-      <AlbumPhotoPreview albumId={album.id} photo={p} />
-      <Button className="mt-1" onClick={() => removeFromAlbum(p.id)}>
+      <AlbumPhotoPreview albumId={album._id} photo={p} />
+      <Button className="mt-1" onClick={() => removeFromAlbum(p._id)}>
         Remove from {album.name}
       </Button>
-      {p.isLiked ? (
+      {user.likedPhotos?.includes(p._id) ? (
         <FilledLikeBtn
           className="mx-5 like-btn"
-          onClick={() => likePhoto(+photoId)}
+          onClick={() => dislikePhoto(p._id)}
         />
       ) : (
-        <LikeBtn className="mx-5" onClick={() => likePhoto(+photoId)} />
+        <LikeBtn className="mx-5" onClick={() => likePhoto(p._id)} />
       )}
     </Col>
   ));

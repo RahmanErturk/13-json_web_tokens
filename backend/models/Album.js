@@ -24,12 +24,12 @@ const schema = new mongoose.Schema(
 const Album = mongoose.model("Album", schema);
 
 export const getAll = async () => {
-  const albums = await Album.find().populate("album");
+  const albums = await Album.find().populate("photos");
   return albums;
 };
 
 export const getOne = async (albumId) => {
-  const album = await Album.findById(albumId).populate("album");
+  const album = await Album.findById(albumId).populate("photos");
 
   return album;
 };

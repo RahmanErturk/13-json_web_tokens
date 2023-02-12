@@ -8,21 +8,28 @@ import PhotosOverview from "./views/PhotosOverview";
 import PhotoProvider from "./Context/PhotoProvider";
 import AlbumPhoto from "./views/AlbumPhoto";
 import LikedPhotos from "./views/LikedPhotos";
+import Register from "./views/Register";
+import Login from "./views/Login";
 import "./styles/main.scss";
 
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <Navbar />
         <PhotoProvider>
+          <Navbar />
           <Routes>
+            <Route path="/register" element={<Register />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/" element={<Main />} />
             <Route path="/photos/:photoId" element={<Photo />} />
             <Route path="/photos" element={<PhotosOverview />} />
             <Route path="/albums/:albumId" element={<Album />} />
             <Route path="/albums/" element={<AlbumsOverview />} />
-            <Route path="/albums/:albumId/:photoId" element={<AlbumPhoto />} />
+            <Route
+              path="/albums/:albumId/photo/:photoId"
+              element={<AlbumPhoto />}
+            />
             <Route path="/liked-photos" element={<LikedPhotos />} />
           </Routes>
         </PhotoProvider>

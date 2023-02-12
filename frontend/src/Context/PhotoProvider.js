@@ -1,5 +1,8 @@
 import React from "react";
 import { createContext, useState, useEffect } from "react";
+import Cookies from "js-cookie";
+
+import { useNavigate } from "react-router-dom";
 
 import { Popover } from "react-bootstrap";
 
@@ -10,19 +13,33 @@ export default function PhotoProvider({ children }) {
   const [album, setAlbum] = useState({});
   const [albumPhotos, setAlbumPhotos] = useState([]);
   const [allAlbums, setAllAlbums] = useState([]);
+  const [loggedInUser, setLoggedInUser] = useState("");
+  const [user, setUser] = useState({});
+
+  const navigate = useNavigate();
+
+  const loggedInCookie = Cookies.get("logged_in");
 
   const getAllAlbums = () => {
-    fetch(`/api/albums`)
-      .then((response) => response.json())
-      .then((data) => setAllAlbums(data));
+    try {
+      fetch(`/api/albums`)
+        .then((response) => response.json())
+        .then((data) => setAllAlbums(data));
+    } catch (error) {
+      console.error(error);
+    }
   };
   useEffect(getAllAlbums, []);
 
   const getAllPhotos = () => {
     // fetch("/api/photos") und beim package.json => proxy: "http://http://localhost:4001, am Ende npm run build "
-    fetch("/api/photos")
-      .then((res) => res.json())
-      .then((data) => setPhotos(data));
+    try {
+      fetch("/api/photos")
+        .then((res) => res.json())
+        .then((data) => setPhotos(data));
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   useEffect(getAllPhotos, []);
@@ -31,58 +48,120 @@ export default function PhotoProvider({ children }) {
     fetch(`/api/photos`)
       .then((response) => response.json())
       .then((data) => {
-        setAlbumPhotos(
-          data.filter((d) =>
-            album.photos
-              ? album.photos.includes(d.id)
-              : console.log("album.photos can not find")
-          )
-        );
+        const albumPhotosID = album.photos?.map((a) => a._id);
+        const albumPhotos = data.filter((d) => albumPhotosID?.includes(d._id));
+        setAlbumPhotos(albumPhotos);
       });
   };
 
   const removePhoto = (id, getData) => {
-    fetch(`/api/photos/${id}`, {
-      method: "DELETE",
-    }).then((res) =>
-      res.status === 202 ? getData() : console.error(res.status)
-    );
+    try {
+      fetch(`/api/photos/${id}`, {
+        method: "DELETE",
+      }).then((res) => {
+        res.status === 204 ? getData() : console.error(res.status);
+
+        navigate("/photos");
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const removeFromAlbum = (id) => {
+    const indexOfPhoto = album.photos.findIndex((i) => i._id === id);
+    const deletedAlbumPhotos = album.photos.splice(indexOfPhoto, 1);
+    try {
+      fetch(`/api/albums/${album._id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          photos: [...album.photos],
+        }),
+      }).then((res) => {
+        res.status === 201 ? getAlbumPhotos() : console.error(res.status);
+        navigate(`/albums/${album._id}`);
+      });
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const addToAlbum = (id, idOfPhoto) => {
-    const index = allAlbums.findIndex((a) => a.id === id);
+    const index = allAlbums.findIndex((a) => a._id === id);
     console.log(index);
 
-    if (allAlbums[index].photos.includes(+idOfPhoto))
+    const albumPhotosID = allAlbums[index].photos.map((a) => a._id);
+    if (albumPhotosID.includes(idOfPhoto))
       return alert(`${allAlbums[index].name} already has the picture.`);
 
-    fetch(`/api/albums/${id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        photos: [...allAlbums[index].photos, +idOfPhoto],
-      }),
-    }).then((res) =>
-      res.status === 202 ? location.reload() : console.error(res.status)
-    );
+    try {
+      fetch(`/api/albums/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          photos: [...allAlbums[index].photos, idOfPhoto],
+        }),
+      }).then((res) =>
+        res.status === 201 ? location.reload() : console.error(res.status)
+      );
+    } catch (error) {
+      console.error(error);
+    }
   };
 
+  const getUser = () => {
+    try {
+      fetch(`/api/auth/users/${loggedInCookie}`)
+        .then((res) => res.json())
+        .then((user) => setUser(user));
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(getUser, []);
+
   const likePhoto = (likeId) => {
-    // const indexLike = like.findIndex((id) => id === likeId);
-    // indexLike < 0 ? like.push(likeId) : like.splice(indexLike, 1);
-    // setLike(like);
+    const indexOfLikedPhoto = photos.findIndex((p) => p._id === likeId);
+    const newLikedPhotos = [...user.likedPhotos, photos[indexOfLikedPhoto]._id];
 
-    const likedPhoto = photos.findIndex((p) => p.id === likeId);
+    try {
+      fetch(`/api/auth/users/${loggedInCookie}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          likedPhotos: newLikedPhotos,
+        }),
+      }).then((res) => {
+        if (res.status === 201) {
+          getUser();
+          getAllPhotos();
+        } else throw Error(res.status);
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
-    fetch(`/api/photos/${likeId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        isLiked: !photos[likedPhoto].isLiked,
-      }),
-    }).then((res) =>
-      res.status === 202 ? getAllPhotos() : console.error(res.status)
-    );
+  const dislikePhoto = (likeId) => {
+    const photoIdIndex = user.likedPhotos.findIndex((p) => p === likeId);
+
+    const newLikedPhotos = user.likedPhotos.splice(photoIdIndex, 1);
+
+    try {
+      fetch(`/api/auth/users/${loggedInCookie}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          likedPhotos: user.likedPhotos,
+        }),
+      }).then((res) =>
+        res.status === 201 ? getAllPhotos() : console.error(res.status)
+      );
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   const popover = (idOfPhoto) => {
@@ -90,14 +169,14 @@ export default function PhotoProvider({ children }) {
       <Popover id="popover-basic">
         <Popover.Header as="h3">Albums</Popover.Header>
         <Popover.Body>
-          {allAlbums.map((alb, i) => {
+          {allAlbums.map((album, i) => {
             return (
               <p
                 className="popover-item"
                 key={i}
-                onClick={() => addToAlbum(alb.id, idOfPhoto)}
+                onClick={() => addToAlbum(album._id, idOfPhoto)}
               >
-                {alb.name}
+                {album.name}
               </p>
             );
           })}
@@ -121,7 +200,13 @@ export default function PhotoProvider({ children }) {
         allAlbums,
         popover,
         likePhoto,
+        dislikePhoto,
         getAllAlbums,
+        removeFromAlbum,
+        loggedInUser,
+        setLoggedInUser,
+        loggedInCookie,
+        user,
       }}
     >
       {children}

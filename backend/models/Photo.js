@@ -18,7 +18,7 @@ const schema = new mongoose.Schema(
     },
     theme: [String],
 
-    album: [
+    albums: [
       {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Album",
@@ -33,12 +33,12 @@ const schema = new mongoose.Schema(
 const Photo = mongoose.model("Photo", schema);
 
 export const getAll = async () => {
-  const photos = await Photo.find().populate("album");
+  const photos = await Photo.find().populate("albums");
   return photos;
 };
 
 export const getOne = async (photoId) => {
-  const photo = await Photo.findById(photoId).populate("album");
+  const photo = await Photo.findById(photoId).populate("albums");
 
   return photo;
 };

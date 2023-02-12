@@ -9,37 +9,44 @@ import LikeBtn from "@mui/icons-material/FavoriteBorder";
 import FilledLikeBtn from "@mui/icons-material/Favorite";
 
 export default function () {
-  const { getAllPhotos, photos, removePhoto, popover, likePhoto } =
-    useContext(photoAppContext);
+  const {
+    getAllPhotos,
+    photos,
+    removePhoto,
+    popover,
+    likePhoto,
+    dislikePhoto,
+    user,
+  } = useContext(photoAppContext);
 
   return (
     <Container>
-      <h2 className="album-title">Alle Fotos</h2>
+      <h2 className="album-title">All Photos</h2>
       <Row>
         {photos.map((p) => (
-          <Col key={p.id} className="mb-5">
+          <Col key={p._id} className="mb-5">
             <PhotoPreview className="photos" photo={p} />
             <OverlayTrigger
               trigger="click"
               placement="right"
-              overlay={popover(p.id)}
+              overlay={popover(p._id)}
             >
               <Button variant="success">Add to Album</Button>
             </OverlayTrigger>
             <Button
               className="mx-3"
-              onClick={() => removePhoto(p.id, getAllPhotos)}
+              onClick={() => removePhoto(p._id, getAllPhotos)}
             >
               Remove
             </Button>
 
-            {p.isLiked ? (
+            {user.likedPhotos?.includes(p._id) ? (
               <FilledLikeBtn
                 className="mx-5 like-btn"
-                onClick={() => likePhoto(p.id)}
+                onClick={() => dislikePhoto(p._id)}
               />
             ) : (
-              <LikeBtn className="mx-5" onClick={() => likePhoto(p.id)} />
+              <LikeBtn className="mx-5" onClick={() => likePhoto(p._id)} />
             )}
           </Col>
         ))}
