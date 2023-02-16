@@ -20,6 +20,12 @@ export default function PhotoProvider({ children }) {
 
   const loggedInCookie = Cookies.get("logged_in");
 
+  useEffect(() => {
+    if (!loggedInCookie) {
+      navigate("/");
+    }
+  }, []);
+
   const getAllAlbums = () => {
     try {
       fetch(`/api/albums`)
@@ -48,7 +54,7 @@ export default function PhotoProvider({ children }) {
     fetch(`/api/photos`)
       .then((response) => response.json())
       .then((data) => {
-        const albumPhotosID = album.photos?.map((a) => a._id);
+        const albumPhotosID = album?.photos?.map((a) => a._id);
         const albumPhotos = data.filter((d) => albumPhotosID?.includes(d._id));
         setAlbumPhotos(albumPhotos);
       });
@@ -88,19 +94,21 @@ export default function PhotoProvider({ children }) {
   };
 
   const addToAlbum = (id, idOfPhoto) => {
-    const index = allAlbums.findIndex((a) => a._id === id);
+    const index = user.albums.findIndex((a) => a._id === id);
     console.log(index);
 
-    const albumPhotosID = allAlbums[index].photos.map((a) => a._id);
+    const albumPhotosID = user.albums[index].photos.map((a) => a._id);
     if (albumPhotosID.includes(idOfPhoto))
       return alert(`${allAlbums[index].name} already has the picture.`);
 
+    user.albums[index].photos.push(idOfPhoto);
+
     try {
-      fetch(`/api/albums/${id}`, {
+      fetch(`/api/auth/users/${user.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          photos: [...allAlbums[index].photos, idOfPhoto],
+          albums: user.albums,
         }),
       }).then((res) =>
         res.status === 201 ? location.reload() : console.error(res.status)
@@ -112,15 +120,17 @@ export default function PhotoProvider({ children }) {
 
   const getUser = () => {
     try {
-      fetch(`/api/auth/users/${loggedInCookie}`)
-        .then((res) => res.json())
-        .then((user) => setUser(user));
+      if (loggedInCookie) {
+        fetch(`/api/auth/users/${loggedInCookie}`)
+          .then((res) => res.json())
+          .then((user) => setUser(user));
+      }
     } catch (error) {
       console.error(error);
     }
   };
 
-  useEffect(getUser, []);
+  useEffect(getUser, [loggedInCookie]);
 
   const likePhoto = (likeId) => {
     const indexOfLikedPhoto = photos.findIndex((p) => p._id === likeId);
@@ -169,7 +179,7 @@ export default function PhotoProvider({ children }) {
       <Popover id="popover-basic">
         <Popover.Header as="h3">Albums</Popover.Header>
         <Popover.Body>
-          {allAlbums.map((album, i) => {
+          {user.albums.map((album, i) => {
             return (
               <p
                 className="popover-item"
@@ -207,6 +217,7 @@ export default function PhotoProvider({ children }) {
         setLoggedInUser,
         loggedInCookie,
         user,
+        getUser,
       }}
     >
       {children}

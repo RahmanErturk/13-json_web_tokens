@@ -30,7 +30,10 @@ export default function () {
     <>
       <Navbar collapseOnSelect bg="dark" variant="dark" expand="lg">
         <Container>
-          <Navbar.Brand href="/">Filmbox</Navbar.Brand>
+          <Navbar.Brand href="/">
+            <span style={{ color: "rgb(24, 160, 160)" }}>my </span>
+            <span style={{ color: "rgb(255, 145, 0)" }}>Gallery</span>
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="responsive-navbar-nav" />
           {loggedInCookie ? (
             <Navbar.Collapse id="responsive-navbar-nav">
@@ -51,7 +54,19 @@ export default function () {
                 Log out
               </Button>
             </Navbar.Collapse>
-          ) : null}
+          ) : (
+            <Navbar.Collapse>
+              <Nav className="me-auto"></Nav>
+              <Link style={{ color: "silver" }} to="register">
+                Sign-up
+              </Link>
+              <Link to="/login">
+                <Button className="mx-3" variant="outline-success">
+                  Sign-in
+                </Button>
+              </Link>
+            </Navbar.Collapse>
+          )}
         </Container>
       </Navbar>
     </>

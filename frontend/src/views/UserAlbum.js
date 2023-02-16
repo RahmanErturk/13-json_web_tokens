@@ -1,7 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect, useContext, useState } from "react";
 import { Container, Row, Col, Button, Form } from "react-bootstrap";
-import AlbumPhotoPreview from "../compontents/AlbumPhotoPreview";
+import Album from "../compontents/Album";
 
 import { photoAppContext } from "../Context/PhotoProvider";
 
@@ -9,44 +9,44 @@ import LikeBtn from "@mui/icons-material/FavoriteBorder";
 import FilledLikeBtn from "@mui/icons-material/Favorite";
 
 export default function () {
-  const { albumId } = useParams();
-  const navigate = useNavigate();
+  const { userId, albumId } = useParams();
+
   const {
+    removeFromAlbum,
     getAlbumPhotos,
     album,
     setAlbum,
-    albumPhotos,
-    removeFromAlbum,
-    likePhoto,
-    dislikePhoto,
+    loggedInCookie,
     user,
+    getUser,
   } = useContext(photoAppContext);
 
   const [nameChange, setNameChange] = useState(false);
   const [input, setInput] = useState("");
 
-  useEffect(() => {
-    try {
-      fetch(`/api/albums/${albumId}`)
-        .then((res) => res.json())
-        .then((data) => {
-          setAlbum(data);
-        });
-    } catch (error) {
-      console.error(error);
-    }
-  }, [albumId]);
+  useEffect(getUser, [albumId]);
 
-  useEffect(getAlbumPhotos, [album._id]);
+  useEffect(() => {
+    setAlbum(user?.albums?.find((a) => a._id === albumId));
+    getAlbumPhotos();
+  }, [user]);
+
+  const albumIdIndex = user?.albums?.findIndex((a) => a._id === albumId);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch(`/api/albums/${albumId}`, {
+    const newAlbums = [...user?.albums];
+    newAlbums[albumIdIndex] = {
+      ...newAlbums[albumIdIndex],
+      name: input,
+    };
+
+    fetch(`/api/auth/users/${loggedInCookie}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: input,
+        albums: newAlbums,
       }),
     }).then((res) => {
       res.json();
@@ -56,27 +56,12 @@ export default function () {
     setNameChange(false);
   };
 
-  const mappedAlbumPhotos = albumPhotos.map((p, i) => (
-    <Col key={i} className="mb-5">
-      <AlbumPhotoPreview albumId={album._id} photo={p} />
-      <Button className="mt-1" onClick={() => removeFromAlbum(p._id)}>
-        Remove from {album.name}
-      </Button>
-      {user.likedPhotos?.includes(p._id) ? (
-        <FilledLikeBtn
-          className="mx-5 like-btn"
-          onClick={() => dislikePhoto(p._id)}
-        />
-      ) : (
-        <LikeBtn className="mx-5" onClick={() => likePhoto(p._id)} />
-      )}
-    </Col>
-  ));
+  const doNotRemove = true;
 
   return (
     <Container>
       <div className="my-2 mb-4">
-        <h2 className="album-title">{album.name}</h2>
+        <h2 className="album-title">{album?.name}</h2>
         {!nameChange ? (
           <Button
             onClick={() => setNameChange(true)}
@@ -103,28 +88,7 @@ export default function () {
           </Form>
         )}
       </div>
-
-      <Row>
-        {album.photos ? (
-          album.photos.length === 0 ? (
-            <div>
-              <h5 className="mt-5">
-                There isn't any photo in this album. Do you want to add some
-                photos? :)
-              </h5>
-              <Button className="mt-2" onClick={() => navigate("/photos")}>
-                Add Photos
-              </Button>
-            </div>
-          ) : (
-            mappedAlbumPhotos
-          )
-        ) : (
-          <h4>Sorry, there is an error :(</h4>
-        )}
-
-        {/* <PhotoPreview photo={{id:1}} /> */}
-      </Row>
+      <Album doNotRemove={doNotRemove} album={album} />
     </Container>
   );
 }

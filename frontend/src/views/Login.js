@@ -19,7 +19,7 @@ export default function Login() {
   useEffect(() => {
     if (loggedInCookie) {
       navigate("/");
-    } else navigate("/login");
+    }
   }, []);
 
   const navigate = useNavigate();
@@ -51,36 +51,43 @@ export default function Login() {
   };
 
   return (
-    <Container>
-      <h2>Login</h2>
-      <form onSubmit={handleForm}>
-        <p id="err-msg">{value.errorMessage}</p>
-        <div className="mb-2">
-          <input
-            type="email"
-            placeholder="E-Mail Address"
-            required
-            value={value.email}
-            onChange={(e) => {
-              setValue({ ...value, email: e.target.value });
-            }}
-          />
-        </div>
-        <div className="mb-2">
-          <input
-            type="password"
-            placeholder="Password"
-            required
-            value={value.password}
-            onChange={(e) => {
-              setValue({ ...value, password: e.target.value });
-            }}
-          />
-        </div>
-        <Button type="submit" varient="btn-primary">
-          Sign-in
-        </Button>
-      </form>
-    </Container>
+    <div className="main-box">
+      <img
+        className="main-pic"
+        src="https://images.pexels.com/photos/1323550/pexels-photo-1323550.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+        alt="bg-pic"
+      />
+      <div className="register">
+        <h2>Login</h2>
+        <form onSubmit={handleForm}>
+          <p id="err-msg">{value.errorMessage}</p>
+          <div className="mb-2">
+            <input
+              type="email"
+              placeholder="E-Mail Address"
+              required
+              value={value.email}
+              onChange={(e) => {
+                setValue({ ...value, email: e.target.value });
+              }}
+            />
+          </div>
+          <div className="mb-4">
+            <input
+              type="password"
+              placeholder="Password"
+              required
+              value={value.password}
+              onChange={(e) => {
+                setValue({ ...value, password: e.target.value });
+              }}
+            />
+          </div>
+          <Button type="submit" varient="btn-primary">
+            Sign-in
+          </Button>
+        </form>
+      </div>
+    </div>
   );
 }

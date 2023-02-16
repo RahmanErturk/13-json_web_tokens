@@ -4,22 +4,28 @@ import Button from "react-bootstrap/Button";
 import { photoAppContext } from "../Context/PhotoProvider";
 
 export default function CreateAlbum() {
-  const { getAllAlbums } = useContext(photoAppContext);
+  const { getUser, loggedInCookie, user } = useContext(photoAppContext);
   const [input, setInput] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    fetch(`/api/albums`, {
-      method: "POST",
+    fetch(`/api/auth/users/${loggedInCookie}`, {
+      method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        name: input,
-        photos: [],
+        albums: [
+          ...user.albums,
+          {
+            name: input,
+            creator: user.userName,
+            photos: [],
+          },
+        ],
       }),
     }).then((res) => {
       res.json();
-      getAllAlbums();
+      getUser();
     });
   };
 
