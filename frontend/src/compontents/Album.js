@@ -16,20 +16,20 @@ export default function Album({ doNotRemove, album }) {
     <Col key={i} className="mb-5">
       <AlbumPhotoPreview userId={user.id} albumId={album._id} photo={p} />
       {doNotRemove && (
-        <Button className="mt-1" onClick={() => remove(p._id)}>
+        <Button className="mt-1" onClick={() => remove(p)}>
           Remove from {album.name}
         </Button>
       )}
 
-      {user.likedPhotos?.includes(p._id) ? (
+      {user.likedPhotos?.includes(doNotRemove ? p : p._id) ? (
         <FilledLikeBtn
           className={doNotRemove ? "mx-5 like-btn" : "like-btn"}
-          onClick={() => dislikePhoto(p._id)}
+          onClick={() => dislikePhoto(doNotRemove ? p : p._id)}
         />
       ) : (
         <LikeBtn
           className={doNotRemove && "mx-5"}
-          onClick={() => likePhoto(p._id)}
+          onClick={() => likePhoto(doNotRemove ? p : p._id)}
         />
       )}
     </Col>

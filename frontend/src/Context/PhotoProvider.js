@@ -134,7 +134,10 @@ export default function PhotoProvider({ children }) {
 
   const likePhoto = (likeId) => {
     const indexOfLikedPhoto = photos.findIndex((p) => p._id === likeId);
-    const newLikedPhotos = [...user.likedPhotos, photos[indexOfLikedPhoto]._id];
+    const newLikedPhotos = [
+      ...user.likedPhotos,
+      photos[indexOfLikedPhoto]?._id,
+    ];
 
     try {
       fetch(`/api/auth/users/${loggedInCookie}`, {
