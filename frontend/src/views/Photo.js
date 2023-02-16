@@ -39,7 +39,7 @@ export default function () {
             <Button variant="success">Add to Album</Button>
           </OverlayTrigger>
           <Button
-            className="mx-5"
+            className="mx-3"
             onClick={() => removePhoto(photoId, getAllPhotos)}
           >
             Remove

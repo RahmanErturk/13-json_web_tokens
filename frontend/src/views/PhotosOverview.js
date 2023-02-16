@@ -42,11 +42,11 @@ export default function () {
 
             {user.likedPhotos?.includes(p._id) ? (
               <FilledLikeBtn
-                className="mx-5 like-btn"
+                className="mx-4 like-btn"
                 onClick={() => dislikePhoto(p._id)}
               />
             ) : (
-              <LikeBtn className="mx-5" onClick={() => likePhoto(p._id)} />
+              <LikeBtn className="mx-4" onClick={() => likePhoto(p._id)} />
             )}
           </Col>
         ))}

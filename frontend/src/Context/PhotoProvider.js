@@ -75,18 +75,18 @@ export default function PhotoProvider({ children }) {
   };
 
   const removeFromAlbum = (id) => {
-    const indexOfPhoto = album.photos.findIndex((i) => i._id === id);
+    const indexOfPhoto = album.photos.findIndex((p) => p === id);
     const deletedAlbumPhotos = album.photos.splice(indexOfPhoto, 1);
     try {
-      fetch(`/api/albums/${album._id}`, {
+      fetch(`/api/auth/users/${loggedInCookie}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          photos: [...album.photos],
+          albums: user.albums,
         }),
       }).then((res) => {
-        res.status === 201 ? getAlbumPhotos() : console.error(res.status);
-        navigate(`/albums/${album._id}`);
+        res.status === 201 ? getUser() : console.error(res.status);
+        // navigate(`users/${user.id}/albums/${album._id}`);
       });
     } catch (error) {
       console.error(error);
@@ -97,8 +97,7 @@ export default function PhotoProvider({ children }) {
     const index = user.albums.findIndex((a) => a._id === id);
     console.log(index);
 
-    const albumPhotosID = user.albums[index].photos.map((a) => a._id);
-    if (albumPhotosID.includes(idOfPhoto))
+    if (user.albums[index].photos.includes(idOfPhoto))
       return alert(`${allAlbums[index].name} already has the picture.`);
 
     user.albums[index].photos.push(idOfPhoto);
@@ -158,8 +157,11 @@ export default function PhotoProvider({ children }) {
   };
 
   const dislikePhoto = (likeId) => {
-    const photoIdIndex = user.likedPhotos.findIndex((p) => p === likeId);
+    const photoIdIndex = user.likedPhotos.findIndex((p) => p == likeId);
 
+    console.log(likeId);
+
+    console.log(photoIdIndex);
     const newLikedPhotos = user.likedPhotos.splice(photoIdIndex, 1);
 
     try {

@@ -24,7 +24,7 @@ export default function AlbumPhoto({ doNotRemove }) {
   return (
     <Container className="d-flex justify-content-center">
       <div style={{ padding: "30px 0 90px 0" }}>
-        <img style={{ maxWidth: "100%", height: "100%" }} src={photo.url} />
+        <img style={{ maxWidth: "100%", height: "100%" }} src={photo?.url} />
         <div className="my-3">
           {doNotRemove && (
             <Button className="mt-1" onClick={() => removeFromAlbum(photoId)}>
@@ -35,12 +35,12 @@ export default function AlbumPhoto({ doNotRemove }) {
           {photo ? (
             user.likedPhotos?.includes(photoId) ? (
               <FilledLikeBtn
-                className={doNotRemove ? "mx-5 like-btn" : "like-btn"}
+                className={doNotRemove ? "mx-3 like-btn" : "like-btn"}
                 onClick={() => dislikePhoto(photoId)}
               />
             ) : (
               <LikeBtn
-                className={doNotRemove && "mx-5"}
+                className={doNotRemove && "mx-3"}
                 onClick={() => likePhoto(photoId)}
               />
             )

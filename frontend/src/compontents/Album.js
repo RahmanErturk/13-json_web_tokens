@@ -10,25 +10,26 @@ import FilledLikeBtn from "@mui/icons-material/Favorite";
 
 export default function Album({ doNotRemove, album }) {
   const navigate = useNavigate();
-  const { likePhoto, dislikePhoto, user } = useContext(photoAppContext);
+  const { likePhoto, dislikePhoto, user, removeFromAlbum } =
+    useContext(photoAppContext);
 
   const mappedAlbumPhotos = album?.photos?.map((p, i) => (
     <Col key={i} className="mb-5">
       <AlbumPhotoPreview userId={user.id} albumId={album._id} photo={p} />
       {doNotRemove && (
-        <Button className="mt-1" onClick={() => remove(p)}>
+        <Button className="mt-1" onClick={() => removeFromAlbum(p)}>
           Remove from {album.name}
         </Button>
       )}
 
       {user.likedPhotos?.includes(doNotRemove ? p : p._id) ? (
         <FilledLikeBtn
-          className={doNotRemove ? "mx-5 like-btn" : "like-btn"}
+          className={doNotRemove ? "mx-4 like-btn" : "like-btn"}
           onClick={() => dislikePhoto(doNotRemove ? p : p._id)}
         />
       ) : (
         <LikeBtn
-          className={doNotRemove && "mx-5"}
+          className={doNotRemove && "mx-4"}
           onClick={() => likePhoto(doNotRemove ? p : p._id)}
         />
       )}
