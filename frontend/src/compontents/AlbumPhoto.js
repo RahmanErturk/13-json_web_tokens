@@ -35,7 +35,7 @@ export default function AlbumPhoto({ doNotRemove }) {
           {photo ? (
             user.likedPhotos?.includes(photoId) ? (
               <FilledLikeBtn
-                className={doNotRemove && "mx-5 like-btn"}
+                className={doNotRemove ? "mx-5 like-btn" : "like-btn"}
                 onClick={() => dislikePhoto(photoId)}
               />
             ) : (

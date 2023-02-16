@@ -23,7 +23,7 @@ export default function Album({ doNotRemove, album }) {
 
       {user.likedPhotos?.includes(p._id) ? (
         <FilledLikeBtn
-          className={doNotRemove && "mx-5 like-btn"}
+          className={doNotRemove ? "mx-5 like-btn" : "like-btn"}
           onClick={() => dislikePhoto(p._id)}
         />
       ) : (
@@ -37,7 +37,7 @@ export default function Album({ doNotRemove, album }) {
 
   return (
     <Container>
-      <Row className="mt-4">
+      <Row className="mt-4 ">
         {album?.photos ? (
           album.photos?.length === 0 ? (
             <div>
@@ -45,9 +45,6 @@ export default function Album({ doNotRemove, album }) {
                 There isn't any photo in this album. Do you want to add some
                 photos? :)
               </h5>
-              <Button className="mt-2" onClick={() => navigate("/photos")}>
-                Add Photos
-              </Button>
             </div>
           ) : (
             mappedAlbumPhotos

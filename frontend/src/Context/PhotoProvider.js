@@ -179,7 +179,7 @@ export default function PhotoProvider({ children }) {
       <Popover id="popover-basic">
         <Popover.Header as="h3">Albums</Popover.Header>
         <Popover.Body>
-          {user.albums.map((album, i) => {
+          {user.albums?.map((album, i) => {
             return (
               <p
                 className="popover-item"
