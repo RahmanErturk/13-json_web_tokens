@@ -95,7 +95,6 @@ export default function PhotoProvider({ children }) {
 
   const addToAlbum = (id, idOfPhoto) => {
     const index = user.albums.findIndex((a) => a._id === id);
-    console.log(index);
 
     if (user.albums[index].photos.includes(idOfPhoto))
       return alert(`${allAlbums[index].name} already has the picture.`);
